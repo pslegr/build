@@ -37,6 +37,7 @@
         <test-jsf.version>1.1.0</test-jsf.version>
         <version.hibernate-validator>4.2.0.Final</version.hibernate-validator>
         <version.slf4j>1.6.1</version.slf4j>
+        <version.site.plugin>3.0</version.site.plugin>
     </properties>
 
     <dependencyManagement>
@@ -370,6 +371,32 @@
         </plugins>
     </build>
 
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>${version.pir.plugin}</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>issue-tracking</report>
+                            <report>project-team</report>
+                            <report>license</report>
+                            <report>scm</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <!-- upgrade in jboss-parent:pom JBBUILD-709 -->
+                <version>2.9</version>
+            </plugin>
+        </plugins>
+    </reporting>
+
     <profiles>
         <profile>
             <id>release</id>
@@ -417,6 +444,49 @@
                                     <goal>check</goal>
                                     <goal>clover</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>jacoco</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <debug>true</debug>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>-Xmx256m ${coverageAgent}</argLine>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.5.5.201112152213</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <phase>process-test-classes</phase>
+                                <configuration>
+                                    <propertyName>coverageAgent</propertyName>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <phase>package</phase>
                             </execution>
                         </executions>
                     </plugin>

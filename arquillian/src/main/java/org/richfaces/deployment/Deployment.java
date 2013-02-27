@@ -26,6 +26,7 @@ import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.faces.webapp.FacesServlet;
 
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -182,11 +183,41 @@ public class Deployment {
     }
 
     /**
+     * Adds dependencies which are necessary to deploy onto Servlet containers (Tomcat, Jetty)
+     */
+    public Deployment withServletContainerSetup() {
+        addMavenDependency("org.glassfish:javax.faces");
+        addMavenDependency("org.jboss.weld.servlet:weld-servlet");
+
+        addMavenDependency("org.jboss.el:jboss-el");
+        addMavenDependency("javax.annotation:jsr250-api:1.0");
+        addMavenDependency("javax.servlet:jstl:1.2");
+
+        webXml(new Function<WebAppDescriptor, WebAppDescriptor>() {
+            @Override
+            public WebAppDescriptor apply(@Nullable WebAppDescriptor input) {
+
+                input
+                    .createListener()
+                        .listenerClass("org.jboss.weld.environment.servlet.Listener")
+                        .up()
+                    .createListener()
+                        .listenerClass("com.sun.faces.config.ConfigureListener")
+                        .up();
+
+                return input;
+            }
+        });
+
+        return this;
+    }
+
+    /**
      * Resolves Maven dependency and writes it to the cache, so it can be reused next run
      */
     private void resolveMavenDependency(String missingDependency, File dir) {
         final JavaArchive[] dependencies = Maven.resolver().loadPomFromFile("pom.xml").resolve(missingDependency)
-            .withTransitivity().as(JavaArchive.class);
+            .withoutTransitivity().as(JavaArchive.class);
 
         for (JavaArchive archive : dependencies) {
             dir.mkdirs();

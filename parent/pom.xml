@@ -88,12 +88,14 @@
         <version.arquillian.warp>1.0.0.Alpha2</version.arquillian.warp>
         <version.arquillian.graphene>2.0.0.Alpha3</version.arquillian.graphene>
         <version.selenium>2.28.0</version.selenium>
-        <version.shrinkwrap.resolver>2.0.0-alpha-7</version.shrinkwrap.resolver>
+        <version.shrinkwrap.resolver>2.0.0-beta-2</version.shrinkwrap.resolver>
         <version.shrinkwrap.descriptors>2.0.0-alpha-3</version.shrinkwrap.descriptors>
         <arquillian.tomcat.version>1.0.0.CR4</arquillian.tomcat.version>
 
         <arquillian.drone.browser>htmlUnit</arquillian.drone.browser>
         <arquillian.drone.reusable>false</arquillian.drone.reusable>
+        <arquillian.richfaces.version></arquillian.richfaces.version>
+        <arquillian.richfaces.servletContainerSetup>false</arquillian.richfaces.servletContainerSetup>
     </properties>
 
     <dependencyManagement>
@@ -1049,6 +1051,9 @@
         </profile>
         <profile>
             <id>tomcat-remote-6</id>
+            <properties>
+                <arquillian.richfaces.servletContainerSetup>true</arquillian.richfaces.servletContainerSetup>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.jboss.arquillian.container</groupId>

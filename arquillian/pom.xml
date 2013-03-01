@@ -89,6 +89,7 @@
                         <configuration>
                             <descriptors>
                                 <descriptor>assembly-configuration-tomcat6.xml</descriptor>
+                                <descriptor>assembly-configuration-tomcat7.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

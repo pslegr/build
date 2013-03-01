@@ -80,13 +80,7 @@
         <version.jcommander>1.20</version.jcommander>
         <version.httpclient>4.2.1</version.httpclient>
         
-        <!-- Containers -->
-        <version.jboss-as7>7.1.1.Final</version.jboss-as7>
-        <version.tomee>1.0.0</version.tomee>
-        <version.tomcat6>6.0.35</version.tomcat6>
-        <version.tomcat7>7.0.26</version.tomcat7>
-        
-        <!-- Arquillian test deps -->
+        <!-- Arquillian versions -->
         <version.arquillian.core>1.0.3.Final</version.arquillian.core>
         <version.arquillian.drone>1.1.0.Final</version.arquillian.drone>
         <version.arquillian.warp>1.0.0.Alpha2</version.arquillian.warp>
@@ -96,10 +90,23 @@
         <version.shrinkwrap.descriptors>2.0.0-alpha-3</version.shrinkwrap.descriptors>
         <version.arquillian.tomcat>1.0.0.CR4</version.arquillian.tomcat>
 
+        <!-- Arquillian Configuration -->
         <arquillian.drone.browser>htmlUnit</arquillian.drone.browser>
         <arquillian.drone.reusable>false</arquillian.drone.reusable>
         <arquillian.richfaces.version></arquillian.richfaces.version>
         <arquillian.richfaces.servletContainerSetup>false</arquillian.richfaces.servletContainerSetup>
+        
+        <!-- Container Versions-->
+        <version.jboss-as7>7.1.1.Final</version.jboss-as7>
+        <version.tomee15>1.5.1</version.tomee15>
+        <version.tomcat6>6.0.35</version.tomcat6>
+        <version.tomcat7>7.0.26</version.tomcat7>
+
+        <!-- Container Selection -->
+        <arquillian.launch.jbossas71>false</arquillian.launch.jbossas71>
+        <arquillian.launch.tomcat6>false</arquillian.launch.tomcat6>
+        <arquillian.launch.tomcat7>false</arquillian.launch.tomcat7>
+        <arquillian.launch.tomee15>false</arquillian.launch.tomee15>
     </properties>
 
     <dependencyManagement>
@@ -621,13 +628,6 @@
                 <artifactId>jboss-as-arquillian-container-remote</artifactId>
                 <version>${version.jboss-as7}</version>
             </dependency>
-
-            <dependency>
-                <groupId>org.apache.openejb</groupId>
-                <artifactId>arquillian-tomee-remote</artifactId>
-                <version>${version.tomee}</version>
-                <scope>test</scope>
-            </dependency>
             
             <!-- Version Lock -->
             <dependency>
@@ -973,10 +973,11 @@
             <activation>
                 <property>
                     <name>integration</name>
-                    <value>jbossas</value>
+                    <value>jbossas71</value>
                 </property>
             </activation>
             <properties>
+                <arquillian.launch.jbossas71>true</arquillian.launch.jbossas71>
                 <jbossHome>${project.build.directory}/jboss-as-${version.jboss-as7}</jbossHome>
             </properties>
             <dependencies>
@@ -1043,24 +1044,58 @@
             </dependencies>
         </profile>
         <profile>
-            <id>tomee-remote-1-0</id>
+            <id>tomee-1-5</id>
             <activation>
                 <property>
                     <name>integration</name>
-                    <value>tomee</value>
+                    <value>tomee15</value>
                 </property>
             </activation>
+            <properties>
+                <arquillian.launch.tomee15>true</arquillian.launch.tomee15>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.apache.openejb</groupId>
                     <artifactId>arquillian-tomee-remote</artifactId>
+                    <version>${version.tomee15}</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.apache.openejb</groupId>
+                                            <artifactId>apache-tomee</artifactId>
+                                            <version>${version.tomee15}</version>
+                                            <classifier>webprofile</classifier>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>tomcat-remote-6</id>
             <properties>
+                <arquillian.launch.tomcat6>true</arquillian.launch.tomcat6>
                 <arquillian.richfaces.servletContainerSetup>true</arquillian.richfaces.servletContainerSetup>
             </properties>
             <dependencies>
@@ -1081,7 +1116,8 @@
                 </property>
             </activation>
             <properties>
-                <tomcat6.home>${project.build.directory}/apache-tomcat-${version.tomcat6}</tomcat6.home>
+                <catalinaHome>${project.build.directory}/apache-tomcat-${version.tomcat6}</catalinaHome>
+                <arquillian.launch.tomcat6>true</arquillian.launch.tomcat6>
                 <arquillian.richfaces.servletContainerSetup>true</arquillian.richfaces.servletContainerSetup>
             </properties>
             <dependencies>
@@ -1137,25 +1173,13 @@
                                             <type>zip</type>
                                             <classifier>configuration-tomcat6</classifier>
                                             <overWrite>true</overWrite>
-                                            <outputDirectory>${tomcat6.home}</outputDirectory>
+                                            <outputDirectory>${catalinaHome}</outputDirectory>
                                             <includes>**/*.*</includes>
                                         </artifactItem>
                                     </artifactItems>
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <configuration>
-                             <systemProperties>
-                                <arquillian.launch>tomcat-managed-6</arquillian.launch>
-                            </systemProperties>
-                            <environmentVariables>
-                                <CATALINA_HOME>${tomcat6.home}</CATALINA_HOME>
-                            </environmentVariables>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -1169,7 +1193,8 @@
                 </property>
             </activation>
             <properties>
-                <tomcat7.home>${project.build.directory}/apache-tomcat-${version.tomcat7}</tomcat7.home>
+                <catalinaHome>${project.build.directory}/apache-tomcat-${version.tomcat7}</catalinaHome>
+                <arquillian.launch.tomcat7>true</arquillian.launch.tomcat7>
                 <arquillian.richfaces.servletContainerSetup>true</arquillian.richfaces.servletContainerSetup>
             </properties>
             <dependencies>
@@ -1225,7 +1250,7 @@
                                             <type>zip</type>
                                             <classifier>configuration-tomcat7</classifier>
                                             <overWrite>true</overWrite>
-                                            <outputDirectory>${tomcat7.home}</outputDirectory>
+                                            <outputDirectory>${catalinaHome}</outputDirectory>
                                             <includes>**/*.*</includes>
                                         </artifactItem>
                                     </artifactItems>
@@ -1237,9 +1262,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
-                             <systemProperties>
-                                <arquillian.launch>tomcat-managed-7</arquillian.launch>
-                            </systemProperties>
                             <environmentVariables>
                                 <CATALINA_HOME>${tomcat7.home}</CATALINA_HOME>
                             </environmentVariables>

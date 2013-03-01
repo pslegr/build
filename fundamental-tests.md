@@ -20,3 +20,10 @@ Start the container with following options setup:
 
     export JAVA_OPTS="-Dcom.sun.management.jmxremote.port=8089 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
     ./bin/catalina.sh run
+
+
+Tomcat 6 - Managed
+==================
+
+    mvn verify -Pbuild -pl :richfaces-ui-output-ui  -Dintegration=tomcat6 -DskipTests=true
+    mvn verify -Pbuild -pl :richfaces-ui-output-ui  -Dintegration=tomcat6 -Dbrowser=firefox -DskipTests=true -Dtest=RF12765_Test

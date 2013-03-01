@@ -5,12 +5,12 @@ import java.lang.annotation.Annotation;
 import org.jboss.arquillian.config.descriptor.api.ArquillianDescriptor;
 import org.jboss.arquillian.drone.configuration.ConfigurationMapper;
 import org.jboss.arquillian.drone.spi.DroneConfiguration;
-import org.richfaces.VersionBean;
 
 public class FundamentalTestConfiguration implements DroneConfiguration<FundamentalTestConfiguration> {
 
     private String richfacesVersion;
     private Boolean servletContainerSetup;
+    private String currentRichfacesVersion = "4.3.1-SNAPSHOT";
 
     /**
      * Get version of RichFaces dependencies to use with the test.
@@ -18,11 +18,14 @@ public class FundamentalTestConfiguration implements DroneConfiguration<Fundamen
      * By default, current project's version will be used.
      */
     public String getRichFacesVersion() {
+        if (richfacesVersion == null) {
+            return currentRichfacesVersion;
+        }
         return richfacesVersion;
     }
 
     public boolean isCurrentRichFacesVersion() {
-        return richfacesVersion == null || richfacesVersion.equals(VersionBean.VERSION.getImplementationVersion());
+        return currentRichfacesVersion.equals(getRichFacesVersion());
     }
 
     /**

@@ -54,7 +54,6 @@
         <version.slf4j>1.6.1</version.slf4j>
         <version.jboss-el>1.0_02.CR6</version.jboss-el>
         <version.sun-el>1.0</version.sun-el>
-        <version.jboss-as7>7.1.1.Final</version.jboss-as7>
         <version.tomee>1.0.0</version.tomee>
         <version.commons-logging>1.1.1</version.commons-logging>
         <version.commons-io>2.1</version.commons-io>
@@ -82,6 +81,10 @@
         <version.jcommander>1.20</version.jcommander>
         <version.httpclient>4.2.1</version.httpclient>
         
+        <!-- Containers -->
+        <version.jboss-as7>7.1.1.Final</version.jboss-as7>
+        <version.tomcat6>6.0.35</version.tomcat6>
+        
         <!-- Arquillian test deps -->
         <version.arquillian.core>1.0.3.Final</version.arquillian.core>
         <version.arquillian.drone>1.1.0.Final</version.arquillian.drone>
@@ -90,7 +93,7 @@
         <version.selenium>2.28.0</version.selenium>
         <version.shrinkwrap.resolver>2.0.0-beta-2</version.shrinkwrap.resolver>
         <version.shrinkwrap.descriptors>2.0.0-alpha-3</version.shrinkwrap.descriptors>
-        <arquillian.tomcat.version>1.0.0.CR4</arquillian.tomcat.version>
+        <version.arquillian.tomcat>1.0.0.CR4</version.arquillian.tomcat>
 
         <arquillian.drone.browser>htmlUnit</arquillian.drone.browser>
         <arquillian.drone.reusable>false</arquillian.drone.reusable>
@@ -890,6 +893,7 @@
             </activation>
             <properties>
                 <integration.test.source>src/test/integration</integration.test.source>
+                <arquillian.debug>false</arquillian.debug>
             </properties>
             <dependencies>
                 <dependency>
@@ -952,6 +956,10 @@
                                 <include>**/integration/**/*.java</include>
                             </includes>
                             <skipTests>${skipITs}</skipTests>
+                            <test>${test}</test>
+                            <systemPropertyVariables>
+                                <arquillian.debug>${arquillian.debug}</arquillian.debug>
+                            </systemPropertyVariables>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -1058,64 +1066,89 @@
                 <dependency>
                     <groupId>org.jboss.arquillian.container</groupId>
                     <artifactId>arquillian-tomcat-remote-6</artifactId>
-                    <version>1.0.0.CR4</version>
+                    <version>${version.arquillian.tomcat}</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
         </profile>
         <profile>
             <id>tomcat-managed-6</id>
+            <activation>
+                <property>
+                    <name>integration</name>
+                    <value>tomcat6</value>
+                </property>
+            </activation>
+            <properties>
+                <tomcat6.home>${project.build.directory}/apache-tomcat-${version.tomcat6}</tomcat6.home>
+                <arquillian.richfaces.servletContainerSetup>true</arquillian.richfaces.servletContainerSetup>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.jboss.arquillian.container</groupId>
                     <artifactId>arquillian-tomcat-managed-6</artifactId>
-                    <version>${arquillian.tomcat.version}</version>
+                    <version>${version.arquillian.tomcat}</version>
                     <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.googlecode.t7mp</groupId>
+                    <artifactId>tomcat</artifactId>
+                    <version>${version.tomcat6}</version>
+                    <type>zip</type>
                 </dependency>
             </dependencies>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-antrun-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
                             <execution>
-                                <phase>generate-resources</phase>
-                                <configuration>
-                                    <tasks>
-                                        <unzip src="${tomcat6Zip}" dest="${project.build.directory}" />
-                                    </tasks>
-                                </configuration>
+                                <id>unpack</id>
+                                <phase>process-test-classes</phase>
                                 <goals>
-                                    <goal>run</goal>
+                                    <goal>unpack</goal>
                                 </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.googlecode.t7mp</groupId>
+                                            <artifactId>tomcat</artifactId>
+                                            <version>${version.tomcat6}</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-configuration</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.richfaces.test</groupId>
+                                            <artifactId>richfaces-arquillian</artifactId>
+                                            <type>zip</type>
+                                            <classifier>configuration-tomcat6</classifier>
+                                            <overWrite>true</overWrite>
+                                            <outputDirectory>${tomcat6.home}</outputDirectory>
+                                            <includes>**/*.*</includes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
                     <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-resources</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${tomcat6.home}/conf</outputDirectory>
-                                    <overwrite>true</overwrite>
-                                    <resources>
-                                        <resource>
-                                            <directory>${basedir}/src/test/resources/tomcat6</directory>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
-                            <systemProperties>
+                             <systemProperties>
                                 <arquillian.launch>tomcat-managed-6</arquillian.launch>
                             </systemProperties>
                             <environmentVariables>
@@ -1130,12 +1163,24 @@
         <!-- Browsers -->
         <profile>
             <id>browser-chrome</id>
+            <activation>
+                <property>
+                    <name>browser</name>
+                    <value>chrome</value>
+                </property>
+            </activation>
             <properties>
                 <arquillian.drone.browser>chrome</arquillian.drone.browser>
             </properties>
         </profile>
         <profile>
             <id>browser-firefox</id>
+            <activation>
+                <property>
+                    <name>browser</name>
+                    <value>firefox</value>
+                </property>
+            </activation>
             <properties>
                 <arquillian.drone.browser>firefox</arquillian.drone.browser>
             </properties>

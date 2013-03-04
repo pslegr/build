@@ -27,3 +27,7 @@ Tomcat 6 - Managed
 
     mvn verify -Pbuild -pl :richfaces-ui-output-ui  -Dintegration=tomcat6 -DskipTests=true
     mvn verify -Pbuild -pl :richfaces-ui-output-ui  -Dintegration=tomcat6 -Dbrowser=firefox -DskipTests=true -Dtest=RF12765_Test
+
+Tomcat 7 - Managed
+==================
+

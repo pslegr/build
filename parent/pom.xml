@@ -96,6 +96,7 @@
         <arquillian.drone.reusable>false</arquillian.drone.reusable>
         <arquillian.richfaces.version></arquillian.richfaces.version>
         <arquillian.richfaces.servletContainerSetup>false</arquillian.richfaces.servletContainerSetup>
+        <arquillian.richfaces.jsfImplementation>org.glassfish:javax.faces</arquillian.richfaces.jsfImplementation>
         
         <!-- Container Versions-->
         <version.jboss-as7>7.1.1.Final</version.jboss-as7>
@@ -831,6 +832,9 @@
                     <value>myfaces</value>
                 </property>
             </activation>
+            <properties>
+                <arquillian.richfaces.jsfImplementation>org.apache.myfaces.core:myfaces-impl</arquillian.richfaces.jsfImplementation>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.apache.myfaces.core</groupId>
@@ -1043,6 +1047,7 @@
                 <dependency>
                     <groupId>org.jboss.as</groupId>
                     <artifactId>jboss-as-arquillian-container-remote</artifactId>
+                    <scope>test</scope>
                 </dependency>
             </dependencies>
         </profile>
@@ -1112,6 +1117,7 @@
                     <groupId>org.jboss.arquillian.container</groupId>
                     <artifactId>arquillian-glassfish-managed-3.1</artifactId>
                     <version>${version.arquillian.glassfish31}</version>
+                    <scope>test</scope>
                 </dependency>
             </dependencies>
             <build>
@@ -1152,6 +1158,7 @@
                     <groupId>org.jboss.arquillian.container</groupId>
                     <artifactId>arquillian-glassfish-remote-3.1</artifactId>
                     <version>${version.arquillian.glassfish31}</version>
+                    <scope>test</scope>
                 </dependency>
             </dependencies>
         </profile>

@@ -181,24 +181,28 @@ public class Deployment {
         Set<File> jarFiles = Sets.newHashSet();
 
         for (String dependency : mavenDependencies) {
-            File dependencyDir = new File(cacheDir, dependency);
+            try {
+                File dependencyDir = new File(cacheDir, dependency);
 
-            if (!dependencyDir.exists()) {
-                resolveMavenDependency(dependency, dependencyDir);
-            } else if (dependencyDirIsStale(dependencyDir)) {
-                cleanDependencyDir(dependencyDir);
-                resolveMavenDependency(dependency, dependencyDir);
-            }
-
-            File[] listFiles = dependencyDir.listFiles(new FilenameFilter() {
-
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".jar");
+                if (!dependencyDir.exists()) {
+                    resolveMavenDependency(dependency, dependencyDir);
+                } else if (dependencyDirIsStale(dependencyDir)) {
+                    cleanDependencyDir(dependencyDir);
+                    resolveMavenDependency(dependency, dependencyDir);
                 }
-            });
 
-            jarFiles.addAll(Arrays.asList(listFiles));
+                File[] listFiles = dependencyDir.listFiles(new FilenameFilter() {
+
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith(".jar");
+                    }
+                });
+
+                jarFiles.addAll(Arrays.asList(listFiles));
+            } catch (Exception e) {
+                throw new IllegalStateException("Can't resolve maven dependency: " + dependency);
+            }
         }
 
         File[] files = jarFiles.toArray(new File[jarFiles.size()]);
@@ -239,7 +243,8 @@ public class Deployment {
      * Adds dependencies which are necessary to deploy onto Servlet containers (Tomcat, Jetty)
      */
     private Deployment withServletContainerSetup() {
-        addMavenDependency("org.glassfish:javax.faces");
+        addMavenDependency(configuration.getJsfImplementation());
+
         addMavenDependency("org.jboss.weld.servlet:weld-servlet");
 
         addMavenDependency("org.jboss.el:jboss-el");
@@ -257,9 +262,6 @@ public class Deployment {
                 input
                     .createListener()
                         .listenerClass("org.jboss.weld.environment.servlet.Listener")
-                        .up()
-                    .createListener()
-                        .listenerClass("com.sun.faces.config.ConfigureListener")
                         .up();
 
                 return input;

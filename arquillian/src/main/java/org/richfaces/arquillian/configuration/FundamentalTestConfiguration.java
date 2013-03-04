@@ -10,7 +10,8 @@ public class FundamentalTestConfiguration implements DroneConfiguration<Fundamen
 
     private String richfacesVersion;
     private Boolean servletContainerSetup;
-    private String currentRichfacesVersion = "4.3.1-SNAPSHOT";
+    private String currentBuildRichfacesVersion = "4.3.1-SNAPSHOT";
+    private String jsfImplementation;
 
     /**
      * Get version of RichFaces dependencies to use with the test.
@@ -18,14 +19,14 @@ public class FundamentalTestConfiguration implements DroneConfiguration<Fundamen
      * By default, current project's version will be used.
      */
     public String getRichFacesVersion() {
-        if (richfacesVersion == null) {
-            return currentRichfacesVersion;
+        if (richfacesVersion == null || richfacesVersion.isEmpty()) {
+            return currentBuildRichfacesVersion;
         }
         return richfacesVersion;
     }
 
     public boolean isCurrentRichFacesVersion() {
-        return currentRichfacesVersion.equals(getRichFacesVersion());
+        return currentBuildRichfacesVersion.equals(getRichFacesVersion());
     }
 
     /**
@@ -35,6 +36,10 @@ public class FundamentalTestConfiguration implements DroneConfiguration<Fundamen
      */
     public boolean servletContainerSetup() {
         return servletContainerSetup;
+    }
+
+    public String getJsfImplementation() {
+        return jsfImplementation;
     }
 
     public void validate() {

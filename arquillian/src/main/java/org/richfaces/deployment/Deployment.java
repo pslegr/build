@@ -119,7 +119,7 @@ public class Deployment {
                 .up();
 
         // TODO versions have to be loaded from POM
-        addMavenDependency("com.google.guava:guava", "net.sourceforge.cssparser:cssparser:0.9.5", "org.w3c.css:sac:1.3");
+        addMavenDependency("com.google.guava:guava", "net.sourceforge.cssparser:cssparser");
 
         // Servlet container setup
         if (configuration.servletContainerSetup()) {
@@ -246,6 +246,7 @@ public class Deployment {
         addMavenDependency(configuration.getJsfImplementation());
 
         addMavenDependency("org.jboss.weld.servlet:weld-servlet");
+        excludeMavenDependency("slf4j-api");
 
         addMavenDependency("org.jboss.el:jboss-el");
         excludeMavenDependency("el-api");

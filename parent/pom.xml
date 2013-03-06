@@ -56,6 +56,7 @@
         <version.sun-el>1.0</version.sun-el>
         <version.commons-logging>1.1.1</version.commons-logging>
         <version.commons-io>2.1</version.commons-io>
+        <version.commons-codec>1.6</version.commons-codec>
         <version.xsom>20081112</version.xsom>
         <version.google-functional-collections>1.1.7</version.google-functional-collections>
         <version.google-guice>3.0</version.google-guice>
@@ -298,6 +299,11 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${version.commons-io}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${version.commons-codec}</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xsom</groupId>
